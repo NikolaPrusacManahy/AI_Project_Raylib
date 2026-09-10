@@ -8,6 +8,15 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "Raylib 2D Template");
     SetTargetFPS(60);
 
+    // ---- Load background ----
+    // Background art is 3840x2160 (same 16:9 ratio as the window), so it
+    // scales down to fill the screen with no distortion or letterboxing.
+    Texture2D background = LoadTexture("resources/game_background_1.png");
+
+    // The top portion of the art is tree trunks/canopy - not walkable.
+    // Ground starts at roughly 20% down from the top of the screen.
+    const float groundLineY = screenHeight * 0.20f;
+
     // ---- Load player spritesheet ----
     // player_walk.png is a walk-cycle sheet: 6 frames, 32x32 each, laid out horizontally
     Texture2D playerTexture = LoadTexture("resources/player_walk.png");
@@ -22,7 +31,7 @@ int main(void)
     const float frameSpeed = 0.1f; // seconds per animation frame
 
     // ---- Player state ----
-    Vector2 playerPos = { screenWidth / 2.0f, screenHeight / 2.0f };
+    Vector2 playerPos = { screenWidth / 2.0f, screenHeight - 150.0f };
     float playerSpeed = 250.0f; // pixels per second
     bool facingLeft = false;
     bool isMoving = false;
@@ -35,16 +44,16 @@ int main(void)
         isMoving = false;
 
         if (IsKeyDown(KEY_RIGHT)) { playerPos.x += playerSpeed * dt; facingLeft = false; isMoving = true; }
-        if (IsKeyDown(KEY_LEFT))  { playerPos.x -= playerSpeed * dt; facingLeft = true;  isMoving = true; }
-        if (IsKeyDown(KEY_DOWN))  { playerPos.y += playerSpeed * dt; isMoving = true; }
-        if (IsKeyDown(KEY_UP))    { playerPos.y -= playerSpeed * dt; isMoving = true; }
+        if (IsKeyDown(KEY_LEFT)) { playerPos.x -= playerSpeed * dt; facingLeft = true;  isMoving = true; }
+        if (IsKeyDown(KEY_DOWN)) { playerPos.y += playerSpeed * dt; isMoving = true; }
+        if (IsKeyDown(KEY_UP)) { playerPos.y -= playerSpeed * dt; isMoving = true; }
 
-        // Keep player on screen
+        // Keep player within screen bounds, and no higher than the ground line
         float drawWidth = frameWidth * scale;
         float drawHeight = frameHeight * scale;
         if (playerPos.x < 0) playerPos.x = 0;
-        if (playerPos.y < 0) playerPos.y = 0;
         if (playerPos.x > screenWidth - drawWidth) playerPos.x = screenWidth - drawWidth;
+        if (playerPos.y < groundLineY) playerPos.y = groundLineY;
         if (playerPos.y > screenHeight - drawHeight) playerPos.y = screenHeight - drawHeight;
 
         // Advance animation only while moving
@@ -65,29 +74,35 @@ int main(void)
 
         // ---- Draw ----
         BeginDrawing();
-            ClearBackground(RAYWHITE);
+        ClearBackground(RAYWHITE);
 
-            DrawText("Move with arrow keys", 10, 10, 20, DARKGRAY);
+        // Draw background stretched to fill the window
+        Rectangle bgSource = { 0, 0, (float)background.width, (float)background.height };
+        Rectangle bgDest = { 0, 0, (float)screenWidth, (float)screenHeight };
+        DrawTexturePro(background, bgSource, bgDest, (Vector2) { 0, 0 }, 0.0f, WHITE);
 
-            // Source rectangle: pick the current frame out of the sheet.
-            // Negative width flips the sprite horizontally when facing left.
-            Rectangle sourceRec = {
-                (float)(currentFrame * frameWidth),
-                0.0f,
-                facingLeft ? -(float)frameWidth : (float)frameWidth,
-                (float)frameHeight
-            };
+        DrawText("Move with arrow keys", 10, 10, 20, WHITE);
 
-            Rectangle destRec = { playerPos.x, playerPos.y, drawWidth, drawHeight };
-            Vector2 origin = { 0.0f, 0.0f };
+        // Source rectangle: pick the current frame out of the sheet.
+        // Negative width flips the sprite horizontally when facing left.
+        Rectangle sourceRec = {
+            (float)(currentFrame * frameWidth),
+            0.0f,
+            facingLeft ? -(float)frameWidth : (float)frameWidth,
+            (float)frameHeight
+        };
 
-            DrawTexturePro(playerTexture, sourceRec, destRec, origin, 0.0f, WHITE);
+        Rectangle destRec = { playerPos.x, playerPos.y, drawWidth, drawHeight };
+        Vector2 origin = { 0.0f, 0.0f };
 
-            DrawFPS(10, screenHeight - 30);
+        DrawTexturePro(playerTexture, sourceRec, destRec, origin, 0.0f, WHITE);
+
+        DrawFPS(10, screenHeight - 30);
         EndDrawing();
     }
 
     // ---- Cleanup ----
+    UnloadTexture(background);
     UnloadTexture(playerTexture);
     CloseWindow();
     return 0;
