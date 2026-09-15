@@ -1,0 +1,43 @@
+# ---- Visual Studio ----
+.vs/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.VC.opendb
+
+# ---- Build output ----
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+*.ilk
+*.pdb
+*.obj
+*.exe
+*.exp
+*.lib
+*.log
+*.tlog
+*.idb
+
+# ---- CMake (in case you switch build systems later) ----
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# ---- raylib (if ever vendored into the repo instead of installed separately) ----
+# raylib/
+
+# ---- OS clutter ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Editor clutter ----
+.vscode/
+*.swp
+*~
