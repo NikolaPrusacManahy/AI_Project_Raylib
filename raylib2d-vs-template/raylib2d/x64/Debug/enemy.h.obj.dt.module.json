@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "raylib2d\\x64\\Debug\\enemy.obj",
+            "outputs": [
+                "raylib2d\\x64\\Debug\\enemy.h.obj.dt.module.json",
+                "raylib2d\\x64\\Debug\\enemy.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}

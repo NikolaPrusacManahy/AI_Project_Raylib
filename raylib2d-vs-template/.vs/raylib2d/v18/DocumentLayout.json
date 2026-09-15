@@ -3,8 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|solutionrelative:main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\include\\enemy.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|solutionrelative:include\\enemy.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\src\\enemy.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|solutionrelative:src\\enemy.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\src\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|solutionrelative:src\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\src\\player.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|solutionrelative:src\\player.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\include\\player.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|solutionrelative:include\\player.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -19,14 +35,66 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "main.c",
-              "DocumentMoniker": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\main.c",
-              "RelativeDocumentMoniker": "main.c",
-              "ToolTip": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\main.c",
-              "RelativeToolTip": "main.c",
-              "ViewState": "AgIAAAgBAAAAAAAAAAAmwBoBAABbAAAAAAAAAA==",
+              "Title": "enemy.h",
+              "DocumentMoniker": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\include\\enemy.h",
+              "RelativeDocumentMoniker": "include\\enemy.h",
+              "ToolTip": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\include\\enemy.h",
+              "RelativeToolTip": "include\\enemy.h",
+              "ViewState": "AgIAACAAAAAAAAAAAAAcwDgAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-09-15T14:24:43.969Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "player.h",
+              "DocumentMoniker": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\include\\player.h",
+              "RelativeDocumentMoniker": "include\\player.h",
+              "ToolTip": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\include\\player.h",
+              "RelativeToolTip": "include\\player.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAF8AAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-09-15T14:24:45.207Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "player.c",
+              "DocumentMoniker": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\src\\player.c",
+              "RelativeDocumentMoniker": "src\\player.c",
+              "ToolTip": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\src\\player.c",
+              "RelativeToolTip": "src\\player.c",
+              "ViewState": "AgIAAAEBAAAAAAAAAAAcwCYBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2026-09-10T09:14:28.273Z",
+              "WhenOpened": "2026-09-15T14:24:45.72Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "enemy.c",
+              "DocumentMoniker": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\src\\enemy.c",
+              "RelativeDocumentMoniker": "src\\enemy.c",
+              "ToolTip": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\src\\enemy.c",
+              "RelativeToolTip": "src\\enemy.c",
+              "ViewState": "AgIAAP0AAAAAAAAAAAAmwCEBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2026-09-15T14:24:44.523Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "main.c",
+              "DocumentMoniker": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\src\\main.c",
+              "RelativeDocumentMoniker": "src\\main.c",
+              "ToolTip": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\src\\main.c",
+              "RelativeToolTip": "src\\main.c",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2026-09-15T14:24:42.789Z",
               "EditorCaption": ""
             }
           ]

@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "raylib2d\\x64\\Debug\\player.obj",
+            "outputs": [
+                "raylib2d\\x64\\Debug\\player.h.obj.dt.module.json",
+                "raylib2d\\x64\\Debug\\player.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}
