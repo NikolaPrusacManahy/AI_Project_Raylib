@@ -1,9 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\gameuser\\Desktop\\repo\\AI_Project_Raylib\\raylib2d-vs-template\\",
+  "WorkspaceRootPath": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|C:\\Users\\gameuser\\Desktop\\repo\\AI_Project_Raylib\\raylib2d-vs-template\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{2C3B1B2E-9F1D-4B7A-9C2E-7E2F1A6B3D10}|raylib2d.vcxproj|solutionrelative:main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
@@ -20,11 +20,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "main.c",
-              "DocumentMoniker": "C:\\Users\\gameuser\\Desktop\\repo\\AI_Project_Raylib\\raylib2d-vs-template\\main.c",
+              "DocumentMoniker": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\main.c",
               "RelativeDocumentMoniker": "main.c",
-              "ToolTip": "C:\\Users\\gameuser\\Desktop\\repo\\AI_Project_Raylib\\raylib2d-vs-template\\main.c*",
-              "RelativeToolTip": "main.c*",
-              "ViewState": "AgIAAB8AAAAAAAAAAAAqwLQAAAABAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\Nikola\\Desktop\\AI_RAYLIB_NOEL\\AI_Project_Raylib\\raylib2d-vs-template\\main.c",
+              "RelativeToolTip": "main.c",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAqwAUAAAAPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2026-09-10T09:14:28.273Z",
               "EditorCaption": ""
