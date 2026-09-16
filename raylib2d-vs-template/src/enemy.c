@@ -134,7 +134,7 @@ static Vector2 PickRespawnPoint(const Enemy* self, Enemy* allEnemies, int allCou
 // allEnemies/allCount let a respawning enemy avoid other alive enemies'
 // positions when picking a new spawn point.
 void UpdateEnemy(Enemy* e, Player* player, float dt, int screenWidth, int screenHeight, float groundLineY,
-    Enemy* allEnemies, int allCount)
+    Enemy* allEnemies, int allCount, bool allowRespawn)
 {
     // ---- Dead: wait, then respawn at a spawn point clear of other enemies ----
     if (e->state == ENEMY_DEAD)
@@ -143,7 +143,7 @@ void UpdateEnemy(Enemy* e, Player* player, float dt, int screenWidth, int screen
         if (e->currentFrame >= ENEMY_DEATH_LAST_FRAME)
         {
             e->deathHoldTimer += dt;
-            if (e->deathHoldTimer >= ENEMY_DEATH_HOLD)
+            if (e->deathHoldTimer >= ENEMY_DEATH_HOLD && allowRespawn)
             {
                 e->respawnTimer += dt;
                 if (e->respawnTimer >= ENEMY_RESPAWN_TIME)

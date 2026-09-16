@@ -183,17 +183,15 @@ void UpdatePlayer(Player* p, float dt, int screenWidth, int screenHeight, float 
         }
     }
 
-    // Death holds on its last frame for a bit, then resets to idle.
+    // Death holds on its last frame once the animation finishes, and stays
+    // there - dying is now a terminal state handled by main.c (freezing
+    // the game and showing the death screen), not an automatic respawn.
     if (p->state == STATE_DEATH && p->currentFrame == frameCount - 1)
     {
         p->deathHoldTimer += dt;
-        if (p->deathHoldTimer >= PLAYER_DEATH_HOLD)
-        {
-            p->deathHoldTimer = 0.0f;
-            p->state = STATE_IDLE;
-            p->currentFrame = 0;
-            p->hp = p->maxHp; // simple respawn: full heal on reset
-        }
+        // deathHoldTimer keeps counting but nothing resets state anymore;
+        // main.c reads p->state == STATE_DEATH directly to know the run
+        // has ended.
     }
 
     // ---- Update rock projectile ----
@@ -223,6 +221,13 @@ void UpdatePlayer(Player* p, float dt, int screenWidth, int screenHeight, float 
 bool PlayerAttackIsActive(const Player* p)
 {
     return (p->state == STATE_ATTACK) && (p->currentFrame == 1 || p->currentFrame == 2);
+}
+
+// The death sheet is 8 frames (index 0-7); "finished" means it has
+// reached and is holding on the last one.
+bool PlayerDeathFinished(const Player* p)
+{
+    return (p->state == STATE_DEATH) && (p->currentFrame == 7);
 }
 
 void DrawPlayer(const Player* p)

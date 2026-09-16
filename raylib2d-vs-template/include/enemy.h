@@ -101,8 +101,11 @@ void UnloadEnemyTextures(EnemyTextures* tex);
 void InitEnemy(Enemy* e, Vector2 startPos);
 // allEnemies/allCount are passed so a respawning enemy can avoid picking
 // a spawn point too close to another enemy that's currently alive.
+// allowRespawn gates whether a dead enemy is allowed to respawn at all -
+// false once the kill target has been reached, so the enemy count winds
+// down instead of respawning forever.
 void UpdateEnemy(Enemy* e, Player* player, float dt, int screenWidth, int screenHeight, float groundLineY,
-    Enemy* allEnemies, int allCount);
+    Enemy* allEnemies, int allCount, bool allowRespawn);
 void DrawEnemy(const Enemy* e, const EnemyTextures* tex);
 
 // Returns true if this hit was the one that killed the enemy (hp reached

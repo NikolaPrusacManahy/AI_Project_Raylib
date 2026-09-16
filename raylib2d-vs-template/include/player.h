@@ -93,4 +93,9 @@ Vector2 PlayerCenter(const Player* p);
 Rectangle PlayerBounds(const Player* p);
 bool PlayerAttackIsActive(const Player* p);
 
+// True once the player has died AND the death animation has fully played
+// out (holding on its last frame) - the point at which main.c should
+// freeze the game and show the death screen, rather than mid-animation.
+bool PlayerDeathFinished(const Player* p);
+
 #endif // PLAYER_H

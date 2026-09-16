@@ -47,6 +47,16 @@ int main(void)
     int killCount = 0;
     bool exitUnlocked = false; // true once killCount reaches KILLS_TO_UNLOCK_EXIT
 
+    // Once the kill target is reached, dead enemies stop respawning -
+    // enemiesCanRespawn is passed into UpdateEnemy for every enemy.
+    // (On the second map there's no limit, so this stays true there too
+    // once the player has crossed over - see the transition block below.)
+    bool enemiesCanRespawn = true;
+
+    // ---- Death / game-over state ----
+    float survivalTime = 0.0f; // seconds survived, stops counting once dead
+    bool gameOver = false;     // true once the death animation has finished playing
+
     // F1 toggles drawing the hitboxes as outlines, for visually checking
     // collision sizing against the sprites instead of guessing at numbers.
     bool showHitboxes = false;
@@ -57,58 +67,82 @@ int main(void)
 
         if (IsKeyPressed(KEY_F1)) showHitboxes = !showHitboxes;
 
-        UpdatePlayer(&player, dt, screenWidth, screenHeight, groundLineY, exitUnlocked);
-
-        // Reset each enemy's "already hit" flag whenever the player isn't
-        // mid-swing, so the next attack can land on each of them again.
-        if (player.state != STATE_ATTACK)
+        if (!gameOver)
         {
-            for (int i = 0; i < ENEMY_COUNT; i++) meleeHitLanded[i] = false;
-        }
+            survivalTime += dt;
 
-        for (int i = 0; i < ENEMY_COUNT; i++)
-        {
-            Enemy* e = &enemies[i];
-            UpdateEnemy(e, &player, dt, screenWidth, screenHeight, groundLineY, enemies, ENEMY_COUNT);
+            UpdatePlayer(&player, dt, screenWidth, screenHeight, groundLineY, exitUnlocked);
 
-            // ---- Melee: only during the attack's active frames, only once per swing ----
-            if (PlayerAttackIsActive(&player) && !meleeHitLanded[i] && e->state != ENEMY_DEAD)
+            // Reset each enemy's "already hit" flag whenever the player
+            // isn't mid-swing, so the next attack can land on each again.
+            if (player.state != STATE_ATTACK)
             {
-                if (CheckCollisionRecs(PlayerBounds(&player), EnemyBounds(e)))
+                for (int i = 0; i < ENEMY_COUNT; i++) meleeHitLanded[i] = false;
+            }
+
+            for (int i = 0; i < ENEMY_COUNT; i++)
+            {
+                Enemy* e = &enemies[i];
+                UpdateEnemy(e, &player, dt, screenWidth, screenHeight, groundLineY,
+                    enemies, ENEMY_COUNT, enemiesCanRespawn);
+
+                // ---- Melee: only during the attack's active frames, only once per swing ----
+                if (PlayerAttackIsActive(&player) && !meleeHitLanded[i] && e->state != ENEMY_DEAD)
                 {
-                    if (EnemyTakeDamage(e, PLAYER_ATTACK_DAMAGE)) killCount++;
-                    meleeHitLanded[i] = true;
+                    if (CheckCollisionRecs(PlayerBounds(&player), EnemyBounds(e)))
+                    {
+                        if (EnemyTakeDamage(e, PLAYER_ATTACK_DAMAGE)) killCount++;
+                        meleeHitLanded[i] = true;
+                    }
+                }
+
+                // ---- Rock vs this enemy ----
+                if (player.rockActive && e->state != ENEMY_DEAD)
+                {
+                    float rockDrawSize = player.texRock.width * ROCK_SCALE;
+                    Rectangle rockBounds = {
+                        player.rockPos.x - rockDrawSize / 2.0f,
+                        player.rockPos.y - rockDrawSize / 2.0f,
+                        rockDrawSize, rockDrawSize
+                    };
+                    if (CheckCollisionRecs(rockBounds, EnemyBounds(e)))
+                    {
+                        if (EnemyTakeDamage(e, ROCK_DAMAGE)) killCount++;
+                        player.rockActive = false; // rock is consumed on hit
+                    }
                 }
             }
 
-            // ---- Rock vs this enemy ----
-            if (player.rockActive && e->state != ENEMY_DEAD)
+            // Stop new enemies from replacing dead ones once the first-map
+            // kill target is reached. Once the player actually crosses
+            // into map 2, respawning turns back on with no further limit
+            // (see the transition block below).
+            if (!onSecondMap && killCount >= KILLS_TO_UNLOCK_EXIT)
             {
-                float rockDrawSize = player.texRock.width * ROCK_SCALE;
-                Rectangle rockBounds = {
-                    player.rockPos.x - rockDrawSize / 2.0f,
-                    player.rockPos.y - rockDrawSize / 2.0f,
-                    rockDrawSize, rockDrawSize
-                };
-                if (CheckCollisionRecs(rockBounds, EnemyBounds(e)))
-                {
-                    if (EnemyTakeDamage(e, ROCK_DAMAGE)) killCount++;
-                    player.rockActive = false; // rock is consumed on hit
-                }
+                exitUnlocked = true;
+                enemiesCanRespawn = false;
             }
-        }
 
-        if (killCount >= KILLS_TO_UNLOCK_EXIT) exitUnlocked = true;
+            // ---- Map transition ----
+            // Once unlocked, UpdatePlayer (above) stops clamping the right
+            // edge, so the player can actually walk past screenWidth. Once
+            // they do, swap to the second map and re-enter from the left.
+            if (exitUnlocked && !onSecondMap && player.pos.x > screenWidth)
+            {
+                currentBackground = background2;
+                onSecondMap = true;
+                player.pos.x = 0.0f;
+                enemiesCanRespawn = true; // no kill limit on the second map
+            }
 
-        // ---- Map transition ----
-        // Once unlocked, UpdatePlayer (above) stops clamping the right
-        // edge, so the player can actually walk past screenWidth. Once
-        // they do, swap to the second map and re-enter from the left.
-        if (exitUnlocked && player.pos.x > screenWidth)
-        {
-            currentBackground = background2;
-            onSecondMap = true;
-            player.pos.x = 0.0f;
+            // ---- Check for death ----
+            // PlayerDeathFinished is true once the death animation has
+            // fully played (not the instant hp hits 0), matching how the
+            // other one-shot animations play out before anything reacts.
+            if (PlayerDeathFinished(&player))
+            {
+                gameOver = true;
+            }
         }
 
         // ---- Draw ----
@@ -122,8 +156,17 @@ int main(void)
         DrawRectangle(5, 5, 620, 30, BLACK);
         DrawText("WASD: move | Left-click: attack | Hold right-click: aim, release: throw", 10, 10, 16, WHITE);
 
-        DrawText(TextFormat("Kills: %d / %d", killCount, KILLS_TO_UNLOCK_EXIT), 10, screenHeight - 105, 20,
-            exitUnlocked ? LIME : WHITE);
+        // Kill counter: shows "/ 7" and the target while on the first map,
+        // just the running total once on the second map (no limit there).
+        // Always plain white now, regardless of unlock state.
+        if (onSecondMap)
+        {
+            DrawText(TextFormat("Kills: %d", killCount), 10, screenHeight - 105, 20, WHITE);
+        }
+        else
+        {
+            DrawText(TextFormat("Kills: %d / %d", killCount, KILLS_TO_UNLOCK_EXIT), 10, screenHeight - 105, 20, WHITE);
+        }
 
         for (int i = 0; i < ENEMY_COUNT; i++) DrawEnemy(&enemies[i], &enemyTex);
         DrawPlayer(&player);
@@ -166,6 +209,30 @@ int main(void)
         }
 
         DrawFPS(10, screenHeight - 30);
+
+        // ---- Death screen overlay ----
+        // Drawn last so it sits on top of everything else; the game loop
+        // above is frozen (see the `if (!gameOver)` guard) so this just
+        // shows over whatever the last live frame looked like.
+        if (gameOver)
+        {
+            DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.7f));
+
+            const char* title = "YOU DIED";
+            int titleSize = 60;
+            int titleWidth = MeasureText(title, titleSize);
+            DrawText(title, (screenWidth - titleWidth) / 2, screenHeight / 2 - 100, titleSize, RED);
+
+            const char* scoreText = TextFormat("Score: %d kills", killCount);
+            int scoreSize = 30;
+            int scoreWidth = MeasureText(scoreText, scoreSize);
+            DrawText(scoreText, (screenWidth - scoreWidth) / 2, screenHeight / 2 - 10, scoreSize, WHITE);
+
+            const char* timeText = TextFormat("Time lasted: %d seconds", (int)survivalTime);
+            int timeWidth = MeasureText(timeText, scoreSize);
+            DrawText(timeText, (screenWidth - timeWidth) / 2, screenHeight / 2 + 30, scoreSize, WHITE);
+        }
+
         EndDrawing();
     }
 
