@@ -44,7 +44,7 @@ int main(void)
     // player's single swing could in principle overlap more than one.
     bool meleeHitLanded[ENEMY_COUNT] = { false };
 
-    int killCount = 0;
+    int killCount = 0; // total enemies killed so far, across all 3
     bool exitUnlocked = false; // true once killCount reaches KILLS_TO_UNLOCK_EXIT
 
     // Once the kill target is reached, dead enemies stop respawning -
@@ -149,6 +149,8 @@ int main(void)
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
+        // Source = the whole background image; dest = the full window, so
+        // it stretches to exactly fill the screen regardless of native size.
         Rectangle bgSource = { 0, 0, (float)currentBackground.width, (float)currentBackground.height };
         Rectangle bgDest = { 0, 0, (float)screenWidth, (float)screenHeight };
         DrawTexturePro(currentBackground, bgSource, bgDest, (Vector2) { 0, 0 }, 0.0f, WHITE);
@@ -180,6 +182,8 @@ int main(void)
             float arrowY = screenHeight / 2.0f + bob;
             float arrowX = screenWidth - 60.0f;
 
+            // The 3 corner points of a right-pointing triangle: two on the
+            // left (top and bottom), one on the right (the tip).
             Vector2 p1 = { arrowX - 20, arrowY - 25 };
             Vector2 p2 = { arrowX - 20, arrowY + 25 };
             Vector2 p3 = { arrowX + 20, arrowY };

@@ -232,6 +232,8 @@ bool PlayerDeathFinished(const Player* p)
 
 void DrawPlayer(const Player* p)
 {
+    // Pick which spritesheet to draw from, and how many frames it has,
+    // based on the player's current state.
     Texture2D activeTex = p->texIdle;
     int frameCount = 4;
     switch (p->state)
@@ -246,12 +248,16 @@ void DrawPlayer(const Player* p)
     }
     int frameWidth = activeTex.width / frameCount;
 
+    // sourceRec crops out just the current frame from the sheet. A
+    // negative width flips the crop horizontally, which is how the
+    // sprite faces left without needing separate mirrored art.
     Rectangle sourceRec = {
         (float)(p->currentFrame * frameWidth),
         0.0f,
         p->facingLeft ? -(float)frameWidth : (float)frameWidth,
         (float)PLAYER_FRAME_HEIGHT
     };
+    // destRec is where and how big to draw it on screen.
     Rectangle destRec = { p->pos.x, p->pos.y, PLAYER_DRAW_SIZE, PLAYER_DRAW_SIZE };
     DrawTexturePro(activeTex, sourceRec, destRec, (Vector2) { 0, 0 }, 0.0f, WHITE);
 

@@ -233,7 +233,10 @@ void UpdateEnemy(Enemy* e, Player* player, float dt, int screenWidth, int screen
     }
     else
     {
-        // Walk toward the player.
+        // Walk toward the player. Dividing by dist turns toPlayer into a
+        // direction of length 1 (normalizing it), so multiplying by
+        // ENEMY_SPEED always moves at a fixed speed regardless of how
+        // far away the player currently is.
         if (dist > 0.0001f)
         {
             e->pos.x += (toPlayer.x / dist) * ENEMY_SPEED * dt;
@@ -302,24 +305,28 @@ void DrawEnemy(const Enemy* e, const EnemyTextures* tex)
     }
     int frameWidth = activeTex.width / frameCount;
 
+    // sourceRec crops out just the current frame from the sheet. A
+    // negative width flips the crop horizontally, so it faces left
+    // without needing separate mirrored art.
     Rectangle sourceRec = {
         (float)(e->currentFrame * frameWidth),
         0.0f,
         e->facingLeft ? -(float)frameWidth : (float)frameWidth,
         (float)ENEMY_FRAME_HEIGHT
     };
+    // destRec is where and how big to draw it on screen.
     Rectangle destRec = { e->pos.x, e->pos.y, ENEMY_DRAW_SIZE, ENEMY_DRAW_SIZE };
     DrawTexturePro(activeTex, sourceRec, destRec, (Vector2) { 0, 0 }, 0.0f, WHITE);
 
     // Small health bar above the enemy's head, only while alive.
     if (e->state != ENEMY_DEAD)
     {
-        float pct = (float)e->hp / (float)e->maxHp;
-        int barW = (int)ENEMY_DRAW_SIZE;
+        float pct = (float)e->hp / (float)e->maxHp; // 0.0 (empty) to 1.0 (full)
+        int barW = (int)ENEMY_DRAW_SIZE;  // bar is as wide as the sprite
         int barX = (int)e->pos.x;
-        int barY = (int)e->pos.y - 10;
-        DrawRectangle(barX, barY, barW, 6, DARKGRAY);
-        DrawRectangle(barX, barY, (int)(barW * pct), 6, RED);
-        DrawRectangleLines(barX, barY, barW, 6, BLACK);
+        int barY = (int)e->pos.y - 10;    // just above the sprite's top edge
+        DrawRectangle(barX, barY, barW, 6, DARKGRAY);              // empty background
+        DrawRectangle(barX, barY, (int)(barW * pct), 6, RED);      // filled portion, scaled by pct
+        DrawRectangleLines(barX, barY, barW, 6, BLACK);            // outline
     }
 }

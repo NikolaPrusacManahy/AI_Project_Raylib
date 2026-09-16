@@ -27,15 +27,15 @@ typedef struct {
 } EnemyTextures;
 
 typedef struct {
-    int currentFrame;
-    float frameTimer;
+    int currentFrame;   // which frame of the current animation is showing
+    float frameTimer;   // counts up toward ENEMY_FRAME_SPEED to advance currentFrame
 
-    Vector2 pos;
-    bool facingLeft;
-    EnemyState state;
+    Vector2 pos;         // top-left corner of the sprite, in world coordinates
+    bool facingLeft;     // true = sprite is flipped to face left
+    EnemyState state;    // what the enemy is currently doing (idle/walk/attack/hurt/dead)
 
-    int hp;
-    int maxHp;
+    int hp;    // current health
+    int maxHp; // health when fully healed (used for the health bar percentage)
 
     float attackCooldown; // counts down; enemy can attack again once it hits 0
     float deathHoldTimer; // how long the death animation has been finished
@@ -47,12 +47,12 @@ typedef struct {
     bool damageAppliedThisSwing;
 } Enemy;
 
-#define ENEMY_SCALE        3.0f
-#define ENEMY_FRAME_HEIGHT 32
-#define ENEMY_FRAME_SPEED  0.1f
+#define ENEMY_SCALE        3.0f   // how much bigger the 32x32 sprite is drawn (96x96 on screen)
+#define ENEMY_FRAME_HEIGHT 32     // every spritesheet frame is 32px tall
+#define ENEMY_FRAME_SPEED  0.1f   // seconds per animation frame
 #define ENEMY_SPEED        190.0f // slightly slower than the player's 250
-#define ENEMY_MAX_HP       50
-#define ENEMY_DAMAGE       10
+#define ENEMY_MAX_HP       50     // starting/maximum health
+#define ENEMY_DAMAGE       10     // damage dealt to the player per successful hit
 #define ENEMY_ATTACK_COOLDOWN 1.0f  // seconds between attacks while in range
 #define ENEMY_DEATH_HOLD   0.6f     // seconds to hold on the last death frame
 #define ENEMY_RESPAWN_TIME 2.0f     // seconds dead before respawning
@@ -94,11 +94,11 @@ typedef struct {
 extern Vector2 g_enemySpawnPoints[4];
 
 // ---- Functions (implemented in src/enemy.c) ----
-void InitEnemySpawnPoints(int screenWidth, int screenHeight, float groundLineY);
-void LoadEnemyTextures(EnemyTextures* tex);
-void UnloadEnemyTextures(EnemyTextures* tex);
+void InitEnemySpawnPoints(int screenWidth, int screenHeight, float groundLineY); // fills in g_enemySpawnPoints - call once at startup
+void LoadEnemyTextures(EnemyTextures* tex);   // loads the shared sprite sheets once
+void UnloadEnemyTextures(EnemyTextures* tex); // frees them - call once before closing the window
 
-void InitEnemy(Enemy* e, Vector2 startPos);
+void InitEnemy(Enemy* e, Vector2 startPos); // sets up one enemy at startPos with full health
 // allEnemies/allCount are passed so a respawning enemy can avoid picking
 // a spawn point too close to another enemy that's currently alive.
 // allowRespawn gates whether a dead enemy is allowed to respawn at all -
@@ -106,13 +106,13 @@ void InitEnemy(Enemy* e, Vector2 startPos);
 // down instead of respawning forever.
 void UpdateEnemy(Enemy* e, Player* player, float dt, int screenWidth, int screenHeight, float groundLineY,
     Enemy* allEnemies, int allCount, bool allowRespawn);
-void DrawEnemy(const Enemy* e, const EnemyTextures* tex);
+void DrawEnemy(const Enemy* e, const EnemyTextures* tex); // draws the sprite and its health bar
 
 // Returns true if this hit was the one that killed the enemy (hp reached
 // 0), so callers can count kills without separately checking state.
 bool EnemyTakeDamage(Enemy* e, int amount);
-Vector2 EnemyCenter(const Enemy* e);
-Rectangle EnemyBounds(const Enemy* e);
-bool EnemyAttackIsActive(const Enemy* e);
+Vector2 EnemyCenter(const Enemy* e);      // the middle point of the enemy's sprite, in world coordinates
+Rectangle EnemyBounds(const Enemy* e);    // the enemy's real (shrunk) hitbox, for collision checks
+bool EnemyAttackIsActive(const Enemy* e); // true only during the frames where its swing can actually hit the player
 
 #endif // ENEMY_H

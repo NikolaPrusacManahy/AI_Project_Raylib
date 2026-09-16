@@ -52,19 +52,19 @@ typedef struct {
 } Player;
 
 // ---- Tunable constants ----
-#define PLAYER_SCALE        3.0f
-#define PLAYER_FRAME_HEIGHT 32
+#define PLAYER_SCALE        3.0f   // how much bigger the 32x32 sprite is drawn (96x96 on screen)
+#define PLAYER_FRAME_HEIGHT 32     // every spritesheet frame is 32px tall
 #define PLAYER_FRAME_SPEED  0.1f   // seconds per animation frame
 #define PLAYER_SPEED        250.0f // pixels per second
-#define PLAYER_MAX_HP       100
+#define PLAYER_MAX_HP       100    // starting/maximum health
 #define PLAYER_DEATH_HOLD   1.0f   // seconds to hold on the last death frame
 
-#define ROCK_SPEED         600.0f
-#define ROCK_MAX_DISTANCE  900.0f
-#define ROCK_SCALE         2.0f
-#define ROCK_DAMAGE        50
+#define ROCK_SPEED         600.0f // pixels per second, once thrown
+#define ROCK_MAX_DISTANCE  900.0f // rock disappears after traveling this far
+#define ROCK_SCALE         2.0f   // how much bigger the 16x16 rock sprite is drawn
+#define ROCK_DAMAGE        50     // damage dealt to an enemy hit by the rock
 
-#define PLAYER_ATTACK_DAMAGE 25
+#define PLAYER_ATTACK_DAMAGE 25 // damage dealt by one melee swing
 
 // Size of the player on screen, after scaling (sprites are square).
 #define PLAYER_DRAW_SIZE (PLAYER_FRAME_HEIGHT * PLAYER_SCALE)
@@ -82,16 +82,16 @@ typedef struct {
 #define PLAYER_HITBOX_HEIGHT (27.0f * PLAYER_SCALE)  // visible body height
 
 // ---- Functions (implemented in src/player.c) ----
-void InitPlayer(Player* p, Vector2 startPos);
-void UpdatePlayer(Player* p, float dt, int screenWidth, int screenHeight, float groundLineY, bool allowExitRight);
-void DrawPlayer(const Player* p);
-void DrawPlayerHealthBar(const Player* p);
-void UnloadPlayer(Player* p);
+void InitPlayer(Player* p, Vector2 startPos);   // sets up a new player at startPos, loads all textures
+void UpdatePlayer(Player* p, float dt, int screenWidth, int screenHeight, float groundLineY, bool allowExitRight); // input, movement, throw, animation - call once per frame
+void DrawPlayer(const Player* p);               // draws the player sprite, aim line, and rock (if any)
+void DrawPlayerHealthBar(const Player* p);       // draws the HP bar in the top-left corner
+void UnloadPlayer(Player* p);                    // frees all loaded textures - call once before closing the window
 
-void PlayerTakeDamage(Player* p, int amount);
-Vector2 PlayerCenter(const Player* p);
-Rectangle PlayerBounds(const Player* p);
-bool PlayerAttackIsActive(const Player* p);
+void PlayerTakeDamage(Player* p, int amount); // reduces hp, switches to hurt or death
+Vector2 PlayerCenter(const Player* p);        // the middle point of the player's sprite, in world coordinates
+Rectangle PlayerBounds(const Player* p);      // the player's real (shrunk) hitbox, for collision checks
+bool PlayerAttackIsActive(const Player* p);   // true only during the frames where a melee swing can actually hit something
 
 // True once the player has died AND the death animation has fully played
 // out (holding on its last frame) - the point at which main.c should
