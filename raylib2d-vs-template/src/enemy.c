@@ -15,14 +15,29 @@ void InitEnemySpawnPoints(int screenWidth, int screenHeight, float groundLineY)
     g_enemySpawnPoints[3] = (Vector2){ screenWidth - ENEMY_DRAW_SIZE, midY };  // right
 }
 
+// Loads the shared sprite sheets once. Every Enemy instance draws using
+// these same textures - only their per-instance state (position, HP,
+// current frame, etc.) differs between the 3 enemies.
+void LoadEnemyTextures(EnemyTextures* tex)
+{
+    tex->texWalk = LoadTexture("resources/enemy_walk.png");   // 6 frames
+    tex->texIdle = LoadTexture("resources/enemy_idle.png");   // 4 frames
+    tex->texAttack = LoadTexture("resources/enemy_attack.png"); // 4 frames
+    tex->texHurt = LoadTexture("resources/enemy_hurt.png");   // 4 frames
+    tex->texDeath = LoadTexture("resources/enemy_death.png");  // 8 frames
+}
+
+void UnloadEnemyTextures(EnemyTextures* tex)
+{
+    UnloadTexture(tex->texWalk);
+    UnloadTexture(tex->texIdle);
+    UnloadTexture(tex->texAttack);
+    UnloadTexture(tex->texHurt);
+    UnloadTexture(tex->texDeath);
+}
+
 void InitEnemy(Enemy* e, Vector2 startPos)
 {
-    e->texWalk = LoadTexture("resources/enemy_walk.png");   // 6 frames
-    e->texIdle = LoadTexture("resources/enemy_idle.png");   // 4 frames
-    e->texAttack = LoadTexture("resources/enemy_attack.png"); // 4 frames
-    e->texHurt = LoadTexture("resources/enemy_hurt.png");   // 4 frames
-    e->texDeath = LoadTexture("resources/enemy_death.png");  // 8 frames
-
     e->currentFrame = 0;
     e->frameTimer = 0.0f;
 
@@ -58,9 +73,11 @@ Vector2 EnemyCenter(const Enemy* e)
 }
 
 // Applies damage and switches to the hurt animation, unless already dead.
-void EnemyTakeDamage(Enemy* e, int amount)
+// Returns true only on the hit that brings hp to 0 (the actual kill),
+// so main.c can count kills without a separate state check.
+bool EnemyTakeDamage(Enemy* e, int amount)
 {
-    if (e->state == ENEMY_DEAD) return;
+    if (e->state == ENEMY_DEAD) return false;
 
     e->hp -= amount;
     if (e->hp <= 0)
@@ -71,22 +88,55 @@ void EnemyTakeDamage(Enemy* e, int amount)
         e->frameTimer = 0.0f;
         e->deathHoldTimer = 0.0f;
         e->respawnTimer = 0.0f;
+        return true;
     }
-    else
+
+    e->state = ENEMY_HURT;
+    e->currentFrame = 0;
+    e->frameTimer = 0.0f;
+    return false;
+}
+
+// Picks a spawn point from g_enemySpawnPoints, avoiding any point too
+// close to another currently-alive enemy so two enemies don't respawn
+// stacked on each other. Falls back to a random point if every point is
+// too close to something (e.g. with few enemies this should be rare).
+static Vector2 PickRespawnPoint(const Enemy* self, Enemy* allEnemies, int allCount)
+{
+    // Try a handful of random picks first, preferring one that's clear.
+    for (int attempt = 0; attempt < 8; attempt++)
     {
-        e->state = ENEMY_HURT;
-        e->currentFrame = 0;
-        e->frameTimer = 0.0f;
+        Vector2 candidate = g_enemySpawnPoints[GetRandomValue(0, 3)];
+        bool tooClose = false;
+
+        for (int i = 0; i < allCount; i++)
+        {
+            Enemy* other = &allEnemies[i];
+            if (other == self || other->state == ENEMY_DEAD) continue;
+
+            float dx = other->pos.x - candidate.x;
+            float dy = other->pos.y - candidate.y;
+            float dist = sqrtf(dx * dx + dy * dy);
+            if (dist < ENEMY_MIN_SPAWN_SEPARATION) { tooClose = true; break; }
+        }
+
+        if (!tooClose) return candidate;
     }
+
+    // Nothing clear after several tries - just use a random point anyway.
+    return g_enemySpawnPoints[GetRandomValue(0, 3)];
 }
 
 // AI: walk toward the player until in attack range, then attack on a
 // cooldown. Handles its own animation stepping and, once dead, the
 // respawn timer/position reset. Takes a non-const Player* because a
 // successful attack calls PlayerTakeDamage, which mutates it.
-void UpdateEnemy(Enemy* e, Player* player, float dt, int screenWidth, int screenHeight, float groundLineY)
+// allEnemies/allCount let a respawning enemy avoid other alive enemies'
+// positions when picking a new spawn point.
+void UpdateEnemy(Enemy* e, Player* player, float dt, int screenWidth, int screenHeight, float groundLineY,
+    Enemy* allEnemies, int allCount)
 {
-    // ---- Dead: wait, then respawn at a random one of the 4 fixed points ----
+    // ---- Dead: wait, then respawn at a spawn point clear of other enemies ----
     if (e->state == ENEMY_DEAD)
     {
         // Let the death animation itself play out and hold briefly first.
@@ -98,7 +148,7 @@ void UpdateEnemy(Enemy* e, Player* player, float dt, int screenWidth, int screen
                 e->respawnTimer += dt;
                 if (e->respawnTimer >= ENEMY_RESPAWN_TIME)
                 {
-                    e->pos = g_enemySpawnPoints[GetRandomValue(0, 3)];
+                    e->pos = PickRespawnPoint(e, allEnemies, allCount);
                     e->hp = e->maxHp;
                     e->state = ENEMY_IDLE;
                     e->currentFrame = 0;
@@ -148,16 +198,10 @@ void UpdateEnemy(Enemy* e, Player* player, float dt, int screenWidth, int screen
     Vector2 toPlayer = { PlayerCenter(player).x - EnemyCenter(e).x, PlayerCenter(player).y - EnemyCenter(e).y };
     float dist = sqrtf(toPlayer.x * toPlayer.x + toPlayer.y * toPlayer.y);
 
-    // "In range" means the two characters' actual hitboxes (not their
-    // full padded sprite frames) are within ENEMY_ATTACK_REACH of
-    // touching - checked by inflating the enemy's own hitbox outward by
-    // that reach and seeing if it now overlaps the player's hitbox.
-    Rectangle enemyReach = EnemyBounds(e);
-    enemyReach.x -= ENEMY_ATTACK_REACH;
-    enemyReach.y -= ENEMY_ATTACK_REACH;
-    enemyReach.width += ENEMY_ATTACK_REACH * 2.0f;
-    enemyReach.height += ENEMY_ATTACK_REACH * 2.0f;
-    bool inRange = CheckCollisionRecs(enemyReach, PlayerBounds(player));
+    // "In range" just means the two characters' actual hitboxes are
+    // touching/overlapping - no extra reach margin, matching what the
+    // F1 debug boxes show.
+    bool inRange = CheckCollisionRecs(EnemyBounds(e), PlayerBounds(player));
 
     if (e->attackCooldown > 0.0f) e->attackCooldown -= dt;
 
@@ -241,20 +285,20 @@ bool EnemyAttackIsActive(const Enemy* e)
         (e->currentFrame >= ENEMY_ATTACK_WINDOW_START && e->currentFrame <= ENEMY_ATTACK_WINDOW_END);
 }
 
-void DrawEnemy(const Enemy* e)
+void DrawEnemy(const Enemy* e, const EnemyTextures* tex)
 {
     // While dead, the death animation plays using the same frame-count
     // logic as the death-hold state above (8 frames, held on the last).
-    Texture2D activeTex = e->texIdle;
+    Texture2D activeTex = tex->texIdle;
     int frameCount = 4;
     switch (e->state)
     {
-    case ENEMY_WALK:   activeTex = e->texWalk;   frameCount = 6; break;
-    case ENEMY_ATTACK: activeTex = e->texAttack; frameCount = 4; break;
-    case ENEMY_HURT:   activeTex = e->texHurt;   frameCount = 4; break;
-    case ENEMY_DEAD:   activeTex = e->texDeath;  frameCount = ENEMY_DEATH_FRAME_COUNT; break;
+    case ENEMY_WALK:   activeTex = tex->texWalk;   frameCount = 6; break;
+    case ENEMY_ATTACK: activeTex = tex->texAttack; frameCount = 4; break;
+    case ENEMY_HURT:   activeTex = tex->texHurt;   frameCount = 4; break;
+    case ENEMY_DEAD:   activeTex = tex->texDeath;  frameCount = ENEMY_DEATH_FRAME_COUNT; break;
     case ENEMY_IDLE:
-    default:           activeTex = e->texIdle;   frameCount = 4; break;
+    default:           activeTex = tex->texIdle;   frameCount = 4; break;
     }
     int frameWidth = activeTex.width / frameCount;
 
@@ -278,13 +322,4 @@ void DrawEnemy(const Enemy* e)
         DrawRectangle(barX, barY, (int)(barW * pct), 6, RED);
         DrawRectangleLines(barX, barY, barW, 6, BLACK);
     }
-}
-
-void UnloadEnemy(Enemy* e)
-{
-    UnloadTexture(e->texWalk);
-    UnloadTexture(e->texIdle);
-    UnloadTexture(e->texAttack);
-    UnloadTexture(e->texHurt);
-    UnloadTexture(e->texDeath);
 }

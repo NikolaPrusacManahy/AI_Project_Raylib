@@ -15,13 +15,18 @@ typedef enum {
     ENEMY_DEAD // dead but waiting to respawn (not the death animation itself)
 } EnemyState;
 
+// Sprite sheets shared by every enemy instance - loaded once, not per
+// enemy, since all 3 enemies use the same art. Kept separate from Enemy
+// itself so adding more enemies never means more texture loads.
 typedef struct {
     Texture2D texWalk;
     Texture2D texIdle;
     Texture2D texAttack;
     Texture2D texHurt;
     Texture2D texDeath;
+} EnemyTextures;
 
+typedef struct {
     int currentFrame;
     float frameTimer;
 
@@ -48,18 +53,21 @@ typedef struct {
 #define ENEMY_SPEED        190.0f // slightly slower than the player's 250
 #define ENEMY_MAX_HP       50
 #define ENEMY_DAMAGE       10
-// How far beyond the two characters' actual hitboxes (see *_HITBOX_*
-// above) the enemy can still reach to attack - NOT a raw center-to-center
-// distance. Using the real hitboxes plus a small melee margin means this
-// stays visually correct even if the sprite art or scale changes later,
-// instead of an arbitrary center-distance number that has to be
-// hand-tuned separately from how big the characters actually are.
-#define ENEMY_ATTACK_REACH 2.0f
 #define ENEMY_ATTACK_COOLDOWN 1.0f  // seconds between attacks while in range
 #define ENEMY_DEATH_HOLD   0.6f     // seconds to hold on the last death frame
 #define ENEMY_RESPAWN_TIME 2.0f     // seconds dead before respawning
 #define ENEMY_DEATH_FRAME_COUNT 8
 #define ENEMY_DEATH_LAST_FRAME (ENEMY_DEATH_FRAME_COUNT - 1)
+
+// How many enemies exist at once, and how many total kills (across all of
+// them) are needed to unlock the transition to the next map.
+#define ENEMY_COUNT 3
+#define KILLS_TO_UNLOCK_EXIT 7
+
+// When picking a random respawn point, an enemy re-rolls if the chosen
+// point is closer than this to another currently-alive enemy, so two
+// enemies don't respawn stacked on top of each other.
+#define ENEMY_MIN_SPAWN_SEPARATION 80.0f
 
 // The enemy's 4-frame attack sheet only deals damage during frames 1-2
 // (the middle of the swing) - same windowed-hit idea as the player's
@@ -87,12 +95,19 @@ extern Vector2 g_enemySpawnPoints[4];
 
 // ---- Functions (implemented in src/enemy.c) ----
 void InitEnemySpawnPoints(int screenWidth, int screenHeight, float groundLineY);
-void InitEnemy(Enemy* e, Vector2 startPos);
-void UpdateEnemy(Enemy* e, Player* player, float dt, int screenWidth, int screenHeight, float groundLineY);
-void DrawEnemy(const Enemy* e);
-void UnloadEnemy(Enemy* e);
+void LoadEnemyTextures(EnemyTextures* tex);
+void UnloadEnemyTextures(EnemyTextures* tex);
 
-void EnemyTakeDamage(Enemy* e, int amount);
+void InitEnemy(Enemy* e, Vector2 startPos);
+// allEnemies/allCount are passed so a respawning enemy can avoid picking
+// a spawn point too close to another enemy that's currently alive.
+void UpdateEnemy(Enemy* e, Player* player, float dt, int screenWidth, int screenHeight, float groundLineY,
+    Enemy* allEnemies, int allCount);
+void DrawEnemy(const Enemy* e, const EnemyTextures* tex);
+
+// Returns true if this hit was the one that killed the enemy (hp reached
+// 0), so callers can count kills without separately checking state.
+bool EnemyTakeDamage(Enemy* e, int amount);
 Vector2 EnemyCenter(const Enemy* e);
 Rectangle EnemyBounds(const Enemy* e);
 bool EnemyAttackIsActive(const Enemy* e);

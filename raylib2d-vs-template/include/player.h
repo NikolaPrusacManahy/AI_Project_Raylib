@@ -83,7 +83,7 @@ typedef struct {
 
 // ---- Functions (implemented in src/player.c) ----
 void InitPlayer(Player* p, Vector2 startPos);
-void UpdatePlayer(Player* p, float dt, int screenWidth, int screenHeight, float groundLineY);
+void UpdatePlayer(Player* p, float dt, int screenWidth, int screenHeight, float groundLineY, bool allowExitRight);
 void DrawPlayer(const Player* p);
 void DrawPlayerHealthBar(const Player* p);
 void UnloadPlayer(Player* p);

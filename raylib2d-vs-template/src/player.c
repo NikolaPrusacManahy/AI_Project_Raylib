@@ -74,7 +74,10 @@ void PlayerTakeDamage(Player* p, int amount)
 
 // Handles input, movement, the rock throw, and animation stepping.
 // screenWidth/Height and groundLineY are passed in for bounds clamping.
-void UpdatePlayer(Player* p, float dt, int screenWidth, int screenHeight, float groundLineY)
+// allowExitRight, when true, skips clamping the right edge, so the
+// caller (main.c) can let the player walk off-screen to trigger a map
+// transition once that's been unlocked.
+void UpdatePlayer(Player* p, float dt, int screenWidth, int screenHeight, float groundLineY, bool allowExitRight)
 {
     p->isMoving = false;
 
@@ -138,9 +141,11 @@ void UpdatePlayer(Player* p, float dt, int screenWidth, int screenHeight, float 
         p->state = p->isMoving ? STATE_WALK : STATE_IDLE;
     }
 
-    // Keep player within screen bounds, and no higher than the ground line
+    // Keep player within screen bounds, and no higher than the ground line.
+    // The right edge is only clamped when allowExitRight is false, so the
+    // player can walk fully off-screen once the map exit is unlocked.
     if (p->pos.x < 0) p->pos.x = 0;
-    if (p->pos.x > screenWidth - PLAYER_DRAW_SIZE) p->pos.x = screenWidth - PLAYER_DRAW_SIZE;
+    if (!allowExitRight && p->pos.x > screenWidth - PLAYER_DRAW_SIZE) p->pos.x = screenWidth - PLAYER_DRAW_SIZE;
     if (p->pos.y < groundLineY) p->pos.y = groundLineY;
     if (p->pos.y > screenHeight - PLAYER_DRAW_SIZE) p->pos.y = screenHeight - PLAYER_DRAW_SIZE;
 
