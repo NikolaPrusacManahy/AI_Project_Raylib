@@ -52,6 +52,7 @@ void InitEnemy(Enemy* e, Vector2 startPos)
     e->deathHoldTimer = 0.0f;
     e->respawnTimer = 0.0f;
     e->damageAppliedThisSwing = false;
+    e->spawnGraceTimer = ENEMY_SPAWN_GRACE_TIME; // grace period starts fresh every spawn
 }
 
 // Rectangle covering the enemy's visible body, for collision checks -
@@ -154,6 +155,7 @@ void UpdateEnemy(Enemy* e, Player* player, float dt, int screenWidth, int screen
                     e->currentFrame = 0;
                     e->frameTimer = 0.0f;
                     e->attackCooldown = 0.0f;
+                    e->spawnGraceTimer = ENEMY_SPAWN_GRACE_TIME; // fresh grace period on respawn too
                 }
             }
         }
@@ -193,6 +195,25 @@ void UpdateEnemy(Enemy* e, Player* player, float dt, int screenWidth, int screen
             }
         }
         return; // skip movement/attack logic entirely while stunned
+    }
+
+    // While the spawn grace period is active, the enemy just idles in
+    // place - no chasing, no attacking - so a freshly (re)spawned enemy
+    // can't immediately hit a player standing right next to its spawn
+    // point.
+    if (e->spawnGraceTimer > 0.0f)
+    {
+        e->spawnGraceTimer -= dt;
+        e->state = ENEMY_IDLE;
+
+        const int idleFrameCount = 4;
+        e->frameTimer += dt;
+        if (e->frameTimer >= ENEMY_FRAME_SPEED)
+        {
+            e->frameTimer = 0.0f;
+            e->currentFrame = (e->currentFrame + 1) % idleFrameCount;
+        }
+        return; // skip movement/attack logic entirely during the grace period
     }
 
     Vector2 toPlayer = { PlayerCenter(player).x - EnemyCenter(e).x, PlayerCenter(player).y - EnemyCenter(e).y };

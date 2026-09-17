@@ -3,11 +3,44 @@
 #include "enemy.h"
 #include <math.h>
 
+// Resets every piece of run state back to a fresh game - player, all
+// enemies, the kill counter, the map, and the death/timer flags. Takes
+// pointers to everything main() owns so it can reset them in place
+// instead of returning a big struct of "new" values.
+static void RestartGame(Player* player, Enemy* enemies, EnemyTextures* enemyTex,
+    bool* meleeHitLanded, int* killCount, bool* exitUnlocked,
+    bool* enemiesCanRespawn, float* survivalTime, bool* gameOver,
+    Texture2D* currentBackground, Texture2D background1, bool* onSecondMap,
+    int screenWidth, int screenHeight, float groundLineY)
+{
+    // Unload the previous run's textures before InitPlayer loads a fresh
+    // set - otherwise every restart leaks the old ones (they're never
+    // freed, just replaced).
+    UnloadPlayer(player);
+    InitPlayer(player, (Vector2) { screenWidth - 200.0f, screenHeight - 150.0f });
+
+    for (int i = 0; i < ENEMY_COUNT; i++)
+    {
+        InitEnemy(&enemies[i], g_enemySpawnPoints[i % 4]);
+        meleeHitLanded[i] = false;
+    }
+    (void)enemyTex; // textures are loaded once and reused - nothing to reset here
+
+    *killCount = 0;
+    *exitUnlocked = false;
+    *enemiesCanRespawn = true;
+    *survivalTime = 0.0f;
+    *gameOver = false;
+
+    *currentBackground = background1;
+    *onSecondMap = false;
+}
+
 int main(void)
 {
     // ---- Window setup ----
-    const int screenWidth = 1280;
-    const int screenHeight = 720;
+    const int screenWidth = 1440;
+    const int screenHeight = 880;
     InitWindow(screenWidth, screenHeight, "Raylib 2D Template");
     SetTargetFPS(60);
 
@@ -20,8 +53,11 @@ int main(void)
     const float groundLineY = screenHeight * 0.20f;
 
     // ---- Player ----
+    // Spawns on the right side of the screen, away from the enemy spawn
+    // points (which are spread around the edges) - starting dead-center
+    // put the player too close to a spawning enemy immediately.
     Player player;
-    InitPlayer(&player, (Vector2) { screenWidth / 2.0f, screenHeight - 150.0f });
+    InitPlayer(&player, (Vector2) { screenWidth - 200.0f, screenHeight - 150.0f });
 
     // ---- Enemies ----
     // All ENEMY_COUNT enemies share one set of loaded textures (they use
@@ -66,6 +102,15 @@ int main(void)
         float dt = GetFrameTime();
 
         if (IsKeyPressed(KEY_F1)) showHitboxes = !showHitboxes;
+
+        // Restart: only listened for while the death screen is showing.
+        if (gameOver && IsKeyPressed(KEY_SPACE))
+        {
+            RestartGame(&player, enemies, &enemyTex, meleeHitLanded, &killCount,
+                &exitUnlocked, &enemiesCanRespawn, &survivalTime, &gameOver,
+                &currentBackground, background1, &onSecondMap,
+                screenWidth, screenHeight, groundLineY);
+        }
 
         if (!gameOver)
         {
@@ -235,6 +280,11 @@ int main(void)
             const char* timeText = TextFormat("Time lasted: %d seconds", (int)survivalTime);
             int timeWidth = MeasureText(timeText, scoreSize);
             DrawText(timeText, (screenWidth - timeWidth) / 2, screenHeight / 2 + 30, scoreSize, WHITE);
+
+            const char* restartText = "Press SPACE to restart";
+            int restartSize = 22;
+            int restartWidth = MeasureText(restartText, restartSize);
+            DrawText(restartText, (screenWidth - restartWidth) / 2, screenHeight / 2 + 80, restartSize, GRAY);
         }
 
         EndDrawing();

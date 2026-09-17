@@ -45,6 +45,12 @@ typedef struct {
     // so a multi-frame active window can't deal damage more than once
     // per swing. Reset whenever a new attack starts.
     bool damageAppliedThisSwing;
+
+    // Counts down from ENEMY_SPAWN_GRACE_TIME whenever the enemy (re)spawns.
+    // While above 0, the enemy just stands there (idle animation only) -
+    // no chasing, no attacking - so the player isn't hit the instant an
+    // enemy appears right next to them.
+    float spawnGraceTimer;
 } Enemy;
 
 #define ENEMY_SCALE        3.0f   // how much bigger the 32x32 sprite is drawn (96x96 on screen)
@@ -56,6 +62,7 @@ typedef struct {
 #define ENEMY_ATTACK_COOLDOWN 1.0f  // seconds between attacks while in range
 #define ENEMY_DEATH_HOLD   0.6f     // seconds to hold on the last death frame
 #define ENEMY_RESPAWN_TIME 2.0f     // seconds dead before respawning
+#define ENEMY_SPAWN_GRACE_TIME 1.0f // seconds after (re)spawning before an enemy can chase/attack
 #define ENEMY_DEATH_FRAME_COUNT 8
 #define ENEMY_DEATH_LAST_FRAME (ENEMY_DEATH_FRAME_COUNT - 1)
 
